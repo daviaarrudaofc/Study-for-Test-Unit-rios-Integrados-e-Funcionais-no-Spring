@@ -12,13 +12,15 @@ public class CarroEntity {
 
     private String modelo;
     private double valorDiaria;
+    private int ano;
 
     public CarroEntity() {
     }
 
-    public CarroEntity( String modelo, double valorDiaria) {
+    public CarroEntity( String modelo, double valorDiaria,int ano) {
         this.modelo = modelo;
         this.valorDiaria = valorDiaria;
+        this.ano = ano;
     }
 
     public Long getId() {
@@ -43,5 +45,13 @@ public class CarroEntity {
 
     public void setValorDiaria(double valorDiaria) {
         this.valorDiaria = valorDiaria;
+    }
+
+    public int getAno() {
+        return ano;
+    }
+
+    public void setAno(int ano) {
+        this.ano = ano;
     }
 }
