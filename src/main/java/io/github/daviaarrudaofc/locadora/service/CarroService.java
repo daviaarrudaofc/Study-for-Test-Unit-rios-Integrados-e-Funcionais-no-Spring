@@ -69,6 +69,17 @@ public class CarroService {
 
     }
 
+    public double calcularValorLocacao(Long id, int qtdDias){
+        if(qtdDias <= 0){
+            throw new IllegalArgumentException("Nenhum dia adicionado");
+        }if (id == null) {
+            throw new EntityNotFoundException("Id Não Encontrado");
+        }
+
+        var carro = buscarPorId(id);
+        return carro.getValorDiaria() * qtdDias;
+    }
+
 
 
 }

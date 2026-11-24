@@ -175,7 +175,19 @@ class CarroServiceTest {
         Mockito.verify(carroRepository, Mockito.times(1)).findAll();
 
 
+    }
 
+    @Test
+    void deveCalcularValorDaLocacao(){
+        var carro = new CarroEntity(1L, "Sedan", 80.0,2027);
+
+        Mockito.when(carroRepository.findById(Mockito.any())).thenReturn(Optional.of(carro));
+
+        var resultadoValorLocacao = carroService.calcularValorLocacao(1L, 3);
+
+        assertThat(resultadoValorLocacao).isEqualTo(240.0);
+        Mockito.verify(carroRepository).findById(1L);
+        Mockito.verify(carroRepository, Mockito.never()).save(Mockito.any());
     }
 
 }
