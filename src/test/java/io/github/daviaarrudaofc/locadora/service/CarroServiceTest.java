@@ -158,4 +158,24 @@ class CarroServiceTest {
 
     }
 
+    @Test
+    void deveListarCarrosComDiariaAteValorInformado(){
+        var carro = new CarroEntity(1L, "Sedan", 80.0,2027);
+        var carro2 = new CarroEntity(2L, "Hatch", 120.0,2027);
+        var carro3 = new CarroEntity(3L, "Sedan", 200.0,2027);
+
+        var lista = List.of(carro,carro2,carro3);
+
+        Mockito.when(carroRepository.findAll()).thenReturn(lista);
+
+        List<CarroEntity> resultado = carroService.listarComDiariaAte(120);
+
+        assertThat(resultado).hasSize(2);
+        assertThat(resultado).doesNotContain(carro3);
+        Mockito.verify(carroRepository, Mockito.times(1)).findAll();
+
+
+
+    }
+
 }

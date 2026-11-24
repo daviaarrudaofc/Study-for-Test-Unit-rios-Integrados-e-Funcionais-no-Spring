@@ -5,6 +5,7 @@ import io.github.daviaarrudaofc.locadora.exceptions.EntityNotFoundException;
 import io.github.daviaarrudaofc.locadora.repository.CarroRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -49,4 +50,25 @@ public class CarroService {
     public List<CarroEntity> listarTodos(){
         return  carroRepository.findAll();
     }
+
+
+    public List<CarroEntity> listarComDiariaAte(double valorMaximo){
+        List<CarroEntity> listaDeCarros = carroRepository.findAll();
+        List<CarroEntity> carrosFiltrados = new ArrayList<>();
+
+        for(CarroEntity carro : listaDeCarros){
+            if(carro.getValorDiaria()<=valorMaximo){
+                carrosFiltrados.add(carro);
+            }
+        }
+
+        if(carrosFiltrados.isEmpty()){
+            throw new EntityNotFoundException("Nenhum carro Encontrado com diária até " + valorMaximo);
+        }
+        return carrosFiltrados;
+
+    }
+
+
+
 }
