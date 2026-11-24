@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -63,10 +64,12 @@ class CarroServiceTest {
     void deveAtualizarUmCarro(){
         //1. Cenário
         var carroExistente = new CarroEntity("Gol", 80.0,2026);
+        // Simula a busca: ao procurar o ID 1, o repositório retorna o carro existente.
         Mockito.when(carroRepository.findById(1L)).thenReturn(Optional.of(carroExistente));
 
         var carroAtualizado = new CarroEntity("Gol", 80.0,2026);
         carroAtualizado.setId(1L);
+        // Simula o save: recebe qualquer carro e devolve o objeto carroAtualizado.
         Mockito.when(carroRepository.save(Mockito.any())).thenReturn(carroAtualizado);
 
         Long id = 1L;
@@ -92,6 +95,67 @@ class CarroServiceTest {
         assertThat(erro).isInstanceOf(EntityNotFoundException.class);
 
         Mockito.verify(carroRepository, Mockito.never()).save(Mockito.any());
+    }
+
+    @Test
+    void deveDeletarUmCarro(){
+        Long id = 1L;
+        var carro = new CarroEntity("Sedan", 10.0,2027);
+
+        Mockito.when(carroRepository.findById(1L)).thenReturn(Optional.of(carro));
+
+        carroService.deletar(id);
+
+        Mockito.verify(carroRepository, Mockito
+                .times(1))
+                .delete(Mockito.any());
+
+    }
+
+
+    @Test
+    void deveDarErroDeletarUmCarro(){
+        Long id = 1L;
+
+        Mockito.when(carroRepository.findById(1L)).thenReturn(Optional.empty());
+
+        var erro = catchThrowable( () -> carroService.deletar(id) );
+
+        assertThat(erro).isInstanceOf(EntityNotFoundException.class);
+
+        Mockito.verify(carroRepository, Mockito.never()).delete(Mockito.any());
+
+    }
+
+    @Test
+    void deveBuscarCarroPorId(){
+        Long id = 1L;
+        var carro = new CarroEntity("Sedan", 10.0,2027);
+
+        Mockito.when(carroRepository.findById(Mockito.any())).thenReturn(Optional.of(carro));
+
+        var carroEncontrado = carroService.buscarPorId(id);
+
+        assertThat(carroEncontrado.getModelo()).isEqualTo("Sedan");
+        assertThat(carroEncontrado.getValorDiaria()).isEqualTo(10.0);
+        assertThat(carroEncontrado.getAno()).isEqualTo(2027);
+    }
+
+    @Test
+    void deveListarTodosOsCarros(){
+        var carro = new CarroEntity(1L, "Sedan", 10.0,2027);
+        var carro2 = new CarroEntity(2L, "Hatch", 10.0,2027);
+
+        var lista = List.of(carro, carro2);
+
+        Mockito.when(carroRepository.findAll()).thenReturn(lista);
+
+        List<CarroEntity> resultado = carroService.listarTodos();
+
+        assertThat(resultado).hasSize(2);
+        Mockito.verify(carroRepository, Mockito.times(1)).findAll();
+        Mockito.verifyNoMoreInteractions(carroRepository);
+
     }
 
 }
