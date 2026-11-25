@@ -1,0 +1,59 @@
+package io.github.daviaarrudaofc.locadora.controller;
+
+import io.github.daviaarrudaofc.locadora.entities.CarroEntity;
+import io.github.daviaarrudaofc.locadora.service.CarroService;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.client.match.MockRestRequestMatchers;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+
+@WebMvcTest(CarroController.class)// cria um contexto para testar somente aql parte da API, ele n vai subir a API completa
+public class CarroControllerTest {       // so vai subir nesse test, o que ce quer testar
+
+    @Autowired
+    MockMvc mvc; // ele serve como um client Http para fazer os teste na nossa API
+
+    @MockitoBean// Cria um mock do serviço para o Spring passar pro controller.
+    CarroService carroService;
+
+
+    @Test
+    void deveSalvarUmCarro() throws Exception{
+        //1. Cenário
+        CarroEntity carro = new CarroEntity(1L, "Honda Civic", 150.0, 2027);
+
+        // antes nesse mOckito.any tava a variavel carro, por isso que tava dando erro
+        Mockito.when(carroService.salvar(Mockito.any())).thenReturn(carro);
+
+        String json = """
+                {
+                    "modelo" : "Honda Civic",
+                    "valorDiaria":  150.0,
+                    "ano" : 2027
+                }
+                """;
+
+        //2. Execução
+        ResultActions result = mvc.perform(
+                post("/carros")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json)
+
+        );
+        //3. Verificação
+        result
+                .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.modelo").value("Honda Civic"));
+
+    }
+}
