@@ -1,6 +1,7 @@
 package io.github.daviaarrudaofc.locadora.controller;
 
 import io.github.daviaarrudaofc.locadora.entities.CarroEntity;
+import io.github.daviaarrudaofc.locadora.exceptions.EntityNotFoundException;
 import io.github.daviaarrudaofc.locadora.service.CarroService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -15,6 +16,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(CarroController.class)// cria um contexto para testar somente aql parte da API, ele n vai subir a API completa
 public class CarroControllerTest {       // so vai subir nesse test, o que ce quer testar
@@ -51,9 +54,36 @@ public class CarroControllerTest {       // so vai subir nesse test, o que ce qu
         );
         //3. Verificação
         result
-                .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.modelo").value("Honda Civic"));
 
     }
+
+
+    @Test
+    void deveObterDetalhesCarro() throws Exception{
+        Mockito.when(carroService.buscarPorId(Mockito.any()))
+                .thenReturn(new CarroEntity(1L, "Civic", 250.0, 2028));
+
+        mvc.perform(
+                MockMvcRequestBuilders.get("/carros/1")
+        ).andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.modelo").value("Civic"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.valorDiaria").value(250.0))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.ano").value(2028));
+    }
+
+    @Test
+    void deveRetornarNotFoundAoTentarObterDetalhesCarroInexistente() throws Exception{
+        Mockito.when(carroService.buscarPorId(Mockito.any()))
+                        .thenThrow(EntityNotFoundException.class);
+        mvc.perform(
+                        MockMvcRequestBuilders.get("/carros/1")
+                ).andExpect(status().isNotFound());
+    }
+
+
+
 }
