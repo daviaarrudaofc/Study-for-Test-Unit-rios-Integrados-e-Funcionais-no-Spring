@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.client.match.MockRestRequestMatchers;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -101,6 +100,72 @@ public class CarroControllerTest {       // so vai subir nesse test, o que ce qu
         ).andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].modelo").value("Argo"))
                 .andExpect(jsonPath("$[1].modelo").value("Celta"));
+    }
+
+
+    @Test
+    void deveAtualizarCarro() throws Exception{
+        Mockito.when(carroService.atualizar(Mockito.any(), Mockito.any()))
+                .thenReturn(new CarroEntity(1L, "Celta", 100.0, 2025));
+
+        String json = """
+                {
+                    "modelo" : "Celta",
+                    "valorDiaria":  100.0,
+                    "ano" : 2025
+                }
+                """;
+
+
+        mvc.perform(
+                MockMvcRequestBuilders.put("/carros/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json)
+        ).andExpect(status().isNoContent());
+    }
+
+
+
+    @Test
+    void deveRetornarNotFoundAoTentarAtualizarCarroInexistente() throws Exception{
+        Mockito.when(carroService.atualizar(Mockito.any(),Mockito.any()))
+                .thenThrow(EntityNotFoundException.class);
+
+        String json = """
+                {
+                    "modelo" : "Celta",
+                    "valorDiaria":  100.0,
+                    "ano" : 2025
+                }
+                """;
+
+
+
+        mvc.perform(
+                MockMvcRequestBuilders.put("/carros/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json)
+        ).andExpect(status().isNotFound());
+    }
+
+
+
+    @Test
+    void deveDeletarUmCarro() throws Exception{
+        Mockito.doNothing().when(carroService).deletar(Mockito.any());
+
+        mvc.perform(MockMvcRequestBuilders.delete("/carros/1"))
+                .andExpect(status().isNoContent());
+    }
+
+
+
+    @Test
+    void deveRetornarNotFoundAoDeletarUmCarroInexistente() throws Exception{
+        Mockito.doThrow(EntityNotFoundException.class).when(carroService).deletar(Mockito.any());
+
+        mvc.perform(MockMvcRequestBuilders.delete("/carros/1"))
+                .andExpect(status().isNotFound());
     }
 
 }

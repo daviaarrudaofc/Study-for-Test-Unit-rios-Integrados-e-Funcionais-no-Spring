@@ -52,4 +52,28 @@ public class CarroController {
     }
 
 
+    @PutMapping("{id}")
+    public ResponseEntity<Void> atualizar(
+            @PathVariable Long id, @RequestBody CarroEntity dadosAtualizados){
+        try {
+            carroService.atualizar(id, dadosAtualizados);
+            return  ResponseEntity.noContent().build();
+        }catch (EntityNotFoundException e){
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+
+
+    @DeleteMapping("{id}")
+    public ResponseEntity<Void> deletar(@PathVariable Long id){
+        try {
+            carroService.deletar(id);
+            return  ResponseEntity.noContent().build();
+        }catch (EntityNotFoundException e){
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+
 }
